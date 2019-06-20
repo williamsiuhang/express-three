@@ -19,6 +19,11 @@
   <script>
     var container, camera, scene, renderer, mesh;
 
+    var mouseX = 0;
+    var mouseY = 0;
+    var windowHalfX = window.innerWidth / 2;
+    var windowHalfY = window.innerHeight / 2;
+
     function init() {
 
       if (WEBGL.isWebGLAvailable() === false) {
@@ -54,15 +59,16 @@
       mesh = new THREE.Mesh(geometry, material);
       scene.add(mesh);
 
-      initGUI();
-
-      renderer = new THREE.WebGLRenderer({
-        antialias: true
-      });
+      renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight);
 
       renderer.setAnimationLoop(function() {
+
+				camera.position.x += ( mouseX - camera.position.x ) * .05;
+				camera.position.y += ( - mouseY - camera.position.y ) * .05;
+
+        camera.lookAt( scene.position );
 
         renderer.render(scene, camera);
 
@@ -72,6 +78,7 @@
 
 
       window.addEventListener('resize', onWindowResize, false);
+      document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 
     }
 
@@ -125,36 +132,18 @@
 
     }
 
-    function initGUI() {
-
-      // Set up dat.GUI to control targets
-      var params = {
-        Spherify: 0,
-        Twist: 0,
-      };
-      var gui = new dat.GUI();
-      var folder = gui.addFolder('Morph Targets');
-
-      folder.add(params, 'Spherify', 0, 1).step(0.01).onChange(function(value) {
-
-        mesh.morphTargetInfluences[0] = value;
-
-      });
-      folder.add(params, 'Twist', 0, 1).step(0.01).onChange(function(value) {
-
-        mesh.morphTargetInfluences[1] = value;
-
-      });
-
-      folder.open();
-
-    }
-
     function onWindowResize() {
 
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
+
+    }
+
+    function onDocumentMouseMove( event ) {
+
+      mouseX = ( event.clientX - windowHalfX ) / 100;
+      mouseY = ( event.clientY - windowHalfY ) / 100;
 
     }
 
